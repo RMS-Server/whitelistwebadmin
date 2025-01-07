@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RMS白名单管理系统 - 管理员</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/style.css?v=1.02" rel="stylesheet">
+    <style>
+        .container { margin-top: 50px; }
+        .table-responsive { margin-top: 20px; }
+        .alert { display: none; }
+        .copyright {
+            text-align: center;
+            margin: 30px 0;
+            color: #fff;
+            font-size: 16px;
+        }
+        .card-header {
+            position: relative;
+            padding: 1rem 1.25rem;
+        }
+        .card-header h2 {
+            margin: 0;
+            display: inline-block;
+            font-size: 1.5rem;
+        }
+        .card-header .btn {
+            position: absolute;
+            right: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        #loginForm {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        #loginForm .main-title {
+            color: #4CAF50;
+            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        #loginForm h2 {
+            color: #333;
+            margin-bottom: 2rem;
+        }
+        #loginForm .form-control {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 0.8rem;
+        }
+        #loginForm .btn-primary {
+            background-color: #4CAF50;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+        }
+        #loginForm .btn-primary:hover {
+            background-color: #45a049;
+        }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 登录表单 -->
+        <div id="loginForm" class="col-md-6 mx-auto">
+            <h1 class="text-center main-title">RMS白名单管理系统</h1>
+            <h2 class="text-center mb-4">管理员登录</h2>
+            <form id="adminLoginForm">
+                <div class="mb-3">
+                    <label for="password" class="form-label">管理员口令</label>
+                    <input type="password" class="form-control" id="password" required>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">登录</button>
+                </div>
+                <div class="alert alert-danger mt-3" id="loginError" style="display: none;"></div>
+            </form>
+        </div>
+
+        <!-- 主要内容 -->
+        <div id="mainContent" style="display: none;">
+            <h1 class="text-center main-title">RMS白名单管理系统 - 管理员</h1>
+            
+            <!-- 提示消息 -->
+            <div class="alert alert-success" id="successAlert"></div>
+            <div class="alert alert-danger" id="errorAlert"></div>
+
+            <!-- 提示消息 -->
+            <div class="alert alert-success" id="successAlert"></div>
+            <div class="alert alert-danger" id="errorAlert"></div>
+            
+            <!-- 临时登录请求 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2>临时登录请求</h2>
+                    <button class="btn btn-sm btn-primary" onclick="refreshTempRequests()">刷新</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>玩家名称</th>
+                                    <th>请求时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tempRequestsTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 待处理申请 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2>待处理申请</h2>
+                    <button class="btn btn-sm btn-primary" onclick="refreshApplications()">刷新</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>玩家名称</th>
+                                    <th>申请时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="applicationsTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 白名单列表 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>白名单列表</h2>
+                    <button class="btn btn-sm btn-primary" onclick="refreshList()">刷新</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>玩家名称</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="whitelistTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 版权信息 -->
+            <div class="copyright">
+                2024 RMS Server. All Rights Reserved.
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let adminToken = '';
+
+        // 显示提示消息
+        function showAlert(message, isError = false) {
+            const alertElement = isError ? document.getElementById('errorAlert') : document.getElementById('successAlert');
+            alertElement.textContent = message;
+            alertElement.style.display = 'block';
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 3000);
+        }
+
+        // 处理登录
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            const loginError = document.getElementById('loginError');
+            
+            try {
+                const response = await fetch('../api/admin-login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password }),
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    adminToken = data.data.token;
+                    document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                    refreshList();
+                    refreshApplications();
+                    loginError.style.display = 'none';
+                } else {
+                    loginError.textContent = data.message;
+                    loginError.style.display = 'block';
+                    document.getElementById('password').value = '';
+                }
+            } catch (error) {
+                loginError.textContent = '登录失败，请稍后重试';
+                loginError.style.display = 'block';
+            }
+        });
+
+        // 刷新白名单列表
+        async function refreshList() {
+            if (!adminToken) return;
+            
+            try {
+                const response = await fetch('../api/list.php', {
+                    headers: {
+                        'Authorization': adminToken
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('whitelistTable');
+                    tbody.innerHTML = '';
+                    
+                    data.data.forEach((item, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.index}</td>
+                            <td>${item.username}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="removeWhitelist(${item.id}, '${item.username}')">
+                                    删除
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    showAlert(data.message, true);
+                }
+            } catch (error) {
+                showAlert('获取白名单列表失败', true);
+            }
+        }
+
+        // 刷新申请列表
+        async function refreshApplications() {
+            if (!adminToken) return;
+            
+            try {
+                const response = await fetch('../api/pending-applications.php', {
+                    headers: {
+                        'Authorization': adminToken
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('applicationsTable');
+                    tbody.innerHTML = '';
+                    
+                    data.data.forEach((item, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${item.username}</td>
+                            <td>${item.created_at}</td>
+                            <td>
+                                <button class="btn btn-sm btn-success me-2" onclick="handleApplication(${item.id}, true)">
+                                    同意
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="handleApplication(${item.id}, false)">
+                                    拒绝
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    showAlert(data.message, true);
+                }
+            } catch (error) {
+                showAlert('获取申请列表失败', true);
+            }
+        }
+
+        // 处理申请
+        async function handleApplication(id, approve) {
+            if (!adminToken) return;
+            
+            try {
+                const response = await fetch('../api/handle-application.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': adminToken
+                    },
+                    body: JSON.stringify({ id, approve }),
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, !data.success);
+                
+                if (data.success) {
+                    refreshApplications();
+                    refreshList();
+                }
+            } catch (error) {
+                showAlert('处理申请失败', true);
+            }
+        }
+
+        // 删除白名单
+        async function removeWhitelist(id, username) {
+            if (!adminToken) return;
+            
+            if (!confirm(`确定要删除玩家 ${username} 的白名单吗？`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('../api/remove.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': adminToken
+                    },
+                    body: JSON.stringify({ id: id }),
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, !data.success);
+                
+                if (data.success) {
+                    refreshList();
+                }
+            } catch (error) {
+                showAlert('删除白名单失败', true);
+            }
+        }
+        // 刷新临时登录请求列表
+        async function refreshTempRequests() {
+            if (!adminToken) return;
+            
+            try {
+                const response = await fetch('../api/temp-requests.php', {
+                    headers: {
+                        'Authorization': adminToken
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('tempRequestsTable');
+                    tbody.innerHTML = '';
+                    
+                    data.data.forEach((item, index) => {
+                        const row = document.createElement('tr');
+                        const statusBadge = getStatusBadge(item.status);
+                        const actions = item.status === 'pending' ? `
+                            <button class="btn btn-sm btn-success me-2" onclick="handleTempRequest(${item.id}, 'approved')">
+                                同意
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="handleTempRequest(${item.id}, 'rejected')">
+                                拒绝
+                            </button>
+                        ` : '';
+                        
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${item.username}</td>
+                            <td>${item.request_time}</td>
+                            <td>${statusBadge}</td>
+                            <td>${actions}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    showAlert(data.message, true);
+                }
+            } catch (error) {
+                showAlert('获取临时登录请求失败', true);
+            }
+        }
+        
+        // 处理临时登录请求
+        async function handleTempRequest(id, status) {
+            if (!adminToken) return;
+            
+            try {
+                const response = await fetch('../api/handle-temp-request.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': adminToken
+                    },
+                    body: JSON.stringify({ id, status }),
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, !data.success);
+                
+                if (data.success) {
+                    refreshTempRequests();
+                }
+            } catch (error) {
+                showAlert('处理临时登录请求失败', true);
+            }
+        }
+        
+        // 获取状态标签
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="badge bg-warning">等待中</span>',
+                'approved': '<span class="badge bg-success">已批准</span>',
+                'rejected': '<span class="badge bg-danger">已拒绝</span>',
+                'timeout': '<span class="badge bg-secondary">已超时</span>'
+            };
+            return badges[status] || status;
+        }
+
+        // 页面加载完成后刷新所有列表
+        document.addEventListener('DOMContentLoaded', () => {
+            if (adminToken) {
+                refreshList();
+                refreshApplications();
+                refreshTempRequests();
+            }
+        });
+    </script>
+</body>
+</html>
