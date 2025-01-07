@@ -1,7 +1,7 @@
 # WhitelistWebAdmin
 
 ## 项目简介
-这是一个在线白名单管理系统
+这是一个在线白名单管理系统，用于配合[WhitelistRMS](https://github.com/XRain66/WhitelistRMS)
 
 ## 项目结构
 ```
@@ -91,9 +91,10 @@ whitelistRMSweb/
 
 4. 管理员密码配置
    - 在`api/config.php`文件中配置管理员密码
-   ```
-   define('ADMIN_PASSWORD', 'YOUR_ADMIN_PASSWORD');
-   ```
+
+    ```
+    define('ADMIN_PASSWORD', 'YOUR_ADMIN_PASSWORD');
+    ```
 
 ### 方式二：命令行部署
 
