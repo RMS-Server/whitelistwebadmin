@@ -96,6 +96,10 @@ whitelistRMSweb/
     define('ADMIN_PASSWORD', 'YOUR_ADMIN_PASSWORD');
     ```
 
+5. 个性化配置
+   - 在`index.html`和`admin/index.html`中修改标题
+
+
 ### 方式二：命令行部署
 
 1. 服务器环境配置
