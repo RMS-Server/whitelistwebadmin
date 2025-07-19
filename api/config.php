@@ -9,7 +9,7 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 define('DB_HOST', 'localhost');
 define('DB_PORT', '3306');
 define('DB_NAME', 'whitelist');
-define('DB_USER', 'teswhitelist');
+define('DB_USER', 'whitelist');
 define('DB_PASS', 'password');
 
 // 管理员配置
@@ -112,9 +112,26 @@ function getConnection() {
             update_time TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
         )");
         
-        // 为现有表添加UUID列（如果不存在）
-        $pdo->exec("ALTER TABLE whitelist ADD COLUMN IF NOT EXISTS uuid VARCHAR(36) NULL");
-        $pdo->exec("ALTER TABLE whitelist_applications ADD COLUMN IF NOT EXISTS uuid VARCHAR(36) NULL");
+        // 为现有表添加UUID列（如果不存在）- 兼容老版本MySQL
+        try {
+            // 检查whitelist表是否有uuid列
+            $stmt = $pdo->query("SHOW COLUMNS FROM whitelist LIKE 'uuid'");
+            if ($stmt->rowCount() == 0) {
+                $pdo->exec("ALTER TABLE whitelist ADD COLUMN uuid VARCHAR(36) NULL");
+            }
+        } catch (PDOException $e) {
+            // 忽略列已存在的错误
+        }
+        
+        try {
+            // 检查whitelist_applications表是否有uuid列  
+            $stmt = $pdo->query("SHOW COLUMNS FROM whitelist_applications LIKE 'uuid'");
+            if ($stmt->rowCount() == 0) {
+                $pdo->exec("ALTER TABLE whitelist_applications ADD COLUMN uuid VARCHAR(36) NULL");
+            }
+        } catch (PDOException $e) {
+            // 忽略列已存在的错误
+        }
         
         return $pdo;
     } catch (PDOException $e) {
