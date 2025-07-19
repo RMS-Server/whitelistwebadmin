@@ -28,7 +28,7 @@ try {
     $pdo->beginTransaction();
 
     // 获取申请信息
-    $stmt = $pdo->prepare('SELECT username FROM whitelist_applications WHERE id = ? AND status = ?');
+    $stmt = $pdo->prepare('SELECT username, uuid FROM whitelist_applications WHERE id = ? AND status = ?');
     $stmt->execute([$id, 'pending']);
     $application = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -38,9 +38,15 @@ try {
     }
 
     if ($approve) {
+        // 如果UUID为空，尝试从Mojang API获取
+        $uuid = $application['uuid'];
+        if (!$uuid) {
+            $uuid = getUUIDFromMojang($application['username']);
+        }
+        
         // 添加到白名单
-        $stmt = $pdo->prepare('INSERT INTO whitelist (username) VALUES (?)');
-        $stmt->execute([$application['username']]);
+        $stmt = $pdo->prepare('INSERT INTO whitelist (username, uuid) VALUES (?, ?)');
+        $stmt->execute([$application['username'], $uuid]);
         
         // 更新申请状态
         $stmt = $pdo->prepare('UPDATE whitelist_applications SET status = ? WHERE id = ?');

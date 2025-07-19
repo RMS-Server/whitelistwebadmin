@@ -9,6 +9,17 @@ if (empty($username)) {
     response(false, '玩家名称不能为空');
 }
 
+// 验证用户名格式（Minecraft用户名规则）
+if (!preg_match('/^[a-zA-Z0-9_]{1,16}$/', $username)) {
+    response(false, '玩家名称格式无效');
+}
+
+// 通过Mojang API获取UUID
+$uuid = getUUIDFromMojang($username);
+if (!$uuid) {
+    response(false, '无法找到该玩家，请检查玩家名称是否正确');
+}
+
 try {
     $pdo = getConnection();
     if (!$pdo) {
@@ -46,13 +57,13 @@ try {
             }
 
             // 更新现有申请记录
-            $stmt = $pdo->prepare('UPDATE whitelist_applications SET status = "pending", created_at = NOW() WHERE id = ?');
-            $stmt->execute([$lastApplication['id']]);
+            $stmt = $pdo->prepare('UPDATE whitelist_applications SET status = "pending", uuid = ?, created_at = NOW() WHERE id = ?');
+            $stmt->execute([$uuid, $lastApplication['id']]);
         }
     } else {
         // 如果没有申请记录，创建新的
-        $stmt = $pdo->prepare('INSERT INTO whitelist_applications (username, status, created_at) VALUES (?, "pending", NOW())');
-        $stmt->execute([$username]);
+        $stmt = $pdo->prepare('INSERT INTO whitelist_applications (username, uuid, status, created_at) VALUES (?, ?, "pending", NOW())');
+        $stmt->execute([$username, $uuid]);
     }
     
     response(true, '申请已提交，请等待管理员审核');

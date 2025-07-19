@@ -91,8 +91,16 @@ function getConnection() {
         $pdo->exec("CREATE TABLE IF NOT EXISTS whitelist_applications (
             id INT AUTO_INCREMENT PRIMARY KEY,
             username VARCHAR(36) NOT NULL UNIQUE,
+            uuid VARCHAR(36) NULL,
             status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )");
+        
+        // 创建白名单表（如果不存在）
+        $pdo->exec("CREATE TABLE IF NOT EXISTS whitelist (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(36) NOT NULL UNIQUE,
+            uuid VARCHAR(36) NULL
         )");
         
         // 创建临时登录表（如果不存在）
@@ -104,10 +112,44 @@ function getConnection() {
             update_time TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
         )");
         
+        // 为现有表添加UUID列（如果不存在）
+        $pdo->exec("ALTER TABLE whitelist ADD COLUMN IF NOT EXISTS uuid VARCHAR(36) NULL");
+        $pdo->exec("ALTER TABLE whitelist_applications ADD COLUMN IF NOT EXISTS uuid VARCHAR(36) NULL");
+        
         return $pdo;
     } catch (PDOException $e) {
         return null;
     }
+}
+
+// 通过Mojang API获取UUID
+function getUUIDFromMojang($username) {
+    $url = "https://api.mojang.com/users/profiles/minecraft/" . urlencode($username);
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'WhitelistRMS/1.0');
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($httpCode === 200 && $response) {
+        $data = json_decode($response, true);
+        if (isset($data['id'])) {
+            // 格式化UUID (添加连字符)
+            $uuid = $data['id'];
+            return substr($uuid, 0, 8) . '-' . 
+                   substr($uuid, 8, 4) . '-' . 
+                   substr($uuid, 12, 4) . '-' . 
+                   substr($uuid, 16, 4) . '-' . 
+                   substr($uuid, 20, 12);
+        }
+    }
+    
+    return null;
 }
 
 // 响应函数

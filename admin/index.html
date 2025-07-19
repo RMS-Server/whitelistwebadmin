@@ -183,6 +183,30 @@
                 </div>
             </div>
 
+            <!-- 系统更新 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2>系统更新</h2>
+                    <button class="btn btn-sm btn-primary" onclick="checkForUpdates()">检查更新</button>
+                </div>
+                <div class="card-body">
+                    <div id="updateStatus">
+                        <p class="text-muted">点击"检查更新"来查看是否有新版本可用</p>
+                    </div>
+                    <div id="updateActions" style="display: none;">
+                        <button class="btn btn-success" onclick="performUpdate()" id="updateBtn">立即更新</button>
+                        <button class="btn btn-secondary ms-2" onclick="hideUpdateActions()">取消</button>
+                    </div>
+                    <div id="updateProgress" style="display: none;">
+                        <div class="progress mb-3">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 100%"></div>
+                        </div>
+                        <p class="text-info">正在更新中，请稍候...</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- 版权信息 -->
             <div class="copyright">
                 2024 RMS Server. All Rights Reserved.
@@ -449,6 +473,105 @@
                 'timeout': '<span class="badge bg-secondary">已超时</span>'
             };
             return badges[status] || status;
+        }
+
+        // 检查更新
+        async function checkForUpdates() {
+            if (!adminToken) return;
+            
+            const updateStatus = document.getElementById('updateStatus');
+            const updateActions = document.getElementById('updateActions');
+            
+            updateStatus.innerHTML = '<p class="text-info">正在检查更新...</p>';
+            updateActions.style.display = 'none';
+            
+            try {
+                const response = await fetch('../api/update.php?action=check', {
+                    headers: {
+                        'Authorization': adminToken
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.data.need_update) {
+                        updateStatus.innerHTML = `
+                            <div class="alert alert-warning">
+                                <strong>发现新版本！</strong><br>
+                                当前版本: ${data.data.current_version}<br>
+                                最新版本: ${data.data.remote_version}
+                            </div>
+                        `;
+                        updateActions.style.display = 'block';
+                    } else {
+                        updateStatus.innerHTML = `
+                            <div class="alert alert-success">
+                                <strong>已是最新版本</strong><br>
+                                当前版本: ${data.data.current_version}
+                            </div>
+                        `;
+                    }
+                } else {
+                    updateStatus.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                }
+            } catch (error) {
+                updateStatus.innerHTML = '<div class="alert alert-danger">检查更新失败，请稍后重试</div>';
+            }
+        }
+        
+        // 执行更新
+        async function performUpdate() {
+            if (!adminToken) return;
+            
+            if (!confirm('确定要执行更新吗？更新过程中请不要关闭页面。')) {
+                return;
+            }
+            
+            const updateStatus = document.getElementById('updateStatus');
+            const updateActions = document.getElementById('updateActions');
+            const updateProgress = document.getElementById('updateProgress');
+            const updateBtn = document.getElementById('updateBtn');
+            
+            updateActions.style.display = 'none';
+            updateProgress.style.display = 'block';
+            updateBtn.disabled = true;
+            
+            try {
+                const response = await fetch('../api/update.php?action=update', {
+                    headers: {
+                        'Authorization': adminToken
+                    }
+                });
+                const data = await response.json();
+                
+                updateProgress.style.display = 'none';
+                
+                if (data.success) {
+                    updateStatus.innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>更新成功！</strong><br>
+                            ${data.data.old_version} → ${data.data.new_version}<br>
+                            <small>页面将在3秒后自动刷新</small>
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 3000);
+                } else {
+                    updateStatus.innerHTML = `<div class="alert alert-danger">更新失败: ${data.message}</div>`;
+                    updateBtn.disabled = false;
+                }
+            } catch (error) {
+                updateProgress.style.display = 'none';
+                updateStatus.innerHTML = '<div class="alert alert-danger">更新失败，请稍后重试</div>';
+                updateBtn.disabled = false;
+            }
+        }
+        
+        // 隐藏更新操作
+        function hideUpdateActions() {
+            document.getElementById('updateActions').style.display = 'none';
         }
 
         // 页面加载完成后刷新所有列表
