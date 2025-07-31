@@ -1,0 +1,24 @@
+{
+  "name": "whitelist-rms-vue",
+  "version": "1.0.0",
+  "description": "RMS白名单管理系统 - Vue3版本",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "vue-router": "^4.2.0",
+    "pinia": "^2.1.0",
+    "axios": "^1.6.0",
+    "bootstrap": "^5.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.5.0",
+    "vite": "^5.0.0",
+    "eslint": "^8.56.0",
+    "eslint-plugin-vue": "^9.19.0"
+  }
+}

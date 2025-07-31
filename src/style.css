@@ -1,7 +1,18 @@
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
 body {
-    background: url('../images/bg.jpg') no-repeat center center fixed;
+    background: url('./assets/bg.webp') no-repeat center center fixed;
     background-size: cover;
     min-height: 100vh;
+    animation: fadeIn 0.5s ease;
+    overflow-x: hidden;
 }
 
 .container {
@@ -9,7 +20,7 @@ body {
 }
 
 .card {
-    background-color: rgba(255, 255, 255, 0.7) !important;
+    background-color: rgba(255, 255, 255, 0.5) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -33,7 +44,13 @@ body {
 }
 
 .table {
-    background-color: transparent !important;
+    --bs-table-bg: transparent !important;
+    /* background-color: rgba(255, 255, 255, 0.2) !important; */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 16px rgba(31, 38, 135, 0.15);
     margin-bottom: 0;
 }
 
@@ -51,15 +68,15 @@ body {
 }
 
 .table tbody tr:nth-child(odd) {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: transparent;
 }
 
 .table tbody tr:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: transparent;
 }
 
 .table tbody tr:hover {
-    background-color: rgba(255, 255, 255, 0.2) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
     transform: scale(1.01);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -93,7 +110,7 @@ body {
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 }
 
-#loginForm {
+.login-form {
     background-color: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -104,7 +121,7 @@ body {
 }
 
 .form-control {
-    background-color: rgba(255, 255, 255, 0.7) !important;
+    background-color: rgba(255, 255, 255, 0.3) !important;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -116,22 +133,17 @@ body {
 }
 
 h1.main-title {
-    color: #4CAF50 !important;  /* 草绿色 */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2) !important;  /* 添加阴影效果 */
+    color: #4CAF50 !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2) !important;
     font-weight: bold !important;
     font-size: 2.5em !important;
     margin-bottom: 1.5rem !important;
     text-align: center !important;
 }
 
-/* 页面加载动画 */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
-}
-
-body {
-    animation: fadeIn 0.5s ease;
 }
 
 .loading-overlay {
@@ -173,7 +185,6 @@ body {
     --easter-egg-color: #9370DB;
 }
 
-/* 彩蛋样式 */
 .easter-egg-active {
     position: relative;
 }
@@ -213,16 +224,6 @@ body {
     background-color: rgba(147, 112, 219, 0.2) !important;
 }
 
-/* 调试边界框 */
-#debugBorder {
-    position: fixed;
-    border: 2px dashed red;
-    pointer-events: none;
-    z-index: 9998;
-    opacity: 0.5;
-}
-
-/* 掉落动画 */
 @keyframes fallOut {
     0% {
         transform: translateY(0) rotate(0deg);
@@ -242,7 +243,6 @@ body {
     animation: fallOut 2s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
 }
 
-/* 为不同元素添加随机延迟和旋转方向 */
 .falling-element:nth-child(2n) {
     animation-delay: 0.1s;
     animation-duration: 2.2s;
@@ -263,7 +263,6 @@ body {
     animation-duration: 2.1s;
 }
 
-/* 成就弹窗样式 */
 @keyframes slideIn {
     from {
         transform: translateX(120%);
@@ -312,7 +311,6 @@ body {
     font-size: 24px;
 }
 
-/* 消息淡入动画的样式 */
 @keyframes fadeInScale {
     from {
         opacity: 0;
@@ -328,7 +326,6 @@ body {
     animation: fadeInScale 0.5s ease-out forwards;
 }
 
-/* 电视雪花屏效果 */
 .tv-static {
     position: fixed;
     top: 0;

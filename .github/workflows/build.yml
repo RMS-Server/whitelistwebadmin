@@ -1,0 +1,72 @@
+name: Build and Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      site_name:
+        description: '网站名称（XXX白名单管理系统）'
+        required: true
+        default: 'RMS白名单管理系统'
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Replace site titles
+      run: |
+        # 替换 index.html 中的标题
+        sed -i "s/<title>.*<\/title>/<title>${{ github.event.inputs.site_name }}<\/title>/" index.html
+        
+        # 替换 AdminPanel.vue 中的标题
+        sed -i "s/RMS白名单管理系统/${{ github.event.inputs.site_name }}/g" src/views/AdminPanel.vue
+        
+        # 替换 UserHome.vue 中的标题
+        sed -i "s/RMS白名单管理系统/${{ github.event.inputs.site_name }}/g" src/views/UserHome.vue
+        
+    - name: Build project
+      run: npm run build
+      
+    - name: Create build info
+      run: |
+        echo "Build Date: $(date)" > dist/build-info.txt
+        echo "Site Name: ${{ github.event.inputs.site_name }}" >> dist/build-info.txt
+        echo "Commit: ${{ github.sha }}" >> dist/build-info.txt
+        
+    - name: Archive build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-${{ github.event.inputs.site_name }}-${{ github.run_number }}
+        path: |
+          dist/
+          api/
+          version
+        retention-days: 30
+        
+    - name: Create release package
+      run: |
+        mkdir -p release
+        cp -r dist/* release/
+        cp -r api release/
+        cp version release/
+        tar -czf ${{ github.event.inputs.site_name }}-build-${{ github.run_number }}.tar.gz -C release .
+        
+    - name: Upload release package
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-package
+        path: ${{ github.event.inputs.site_name }}-build-${{ github.run_number }}.tar.gz
+        retention-days: 90
