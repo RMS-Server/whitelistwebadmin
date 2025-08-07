@@ -17,7 +17,7 @@ if (!preg_match('/^[a-zA-Z0-9_]{1,16}$/', $username)) {
 // 通过Mojang API获取UUID
 $uuid = getUUIDFromMojang($username);
 if (!$uuid) {
-    response(false, '无法找到该玩家，请检查玩家名称是否正确');
+    $uuid = null;
 }
 
 try {
